@@ -8,26 +8,25 @@ WORKDIR /app
 COPY gradle ./gradle
 COPY gradlew ./
 COPY gradle.properties ./
-COPY settings.gradle.kts ./
+COPY settings.docker.gradle.kts ./settings.gradle.kts
 COPY build.gradle.kts ./
 
 # Copy all module build files
 COPY mpp-core/build.gradle.kts ./mpp-core/
-COPY mpp-ui/build.gradle.kts ./mpp-ui/
 COPY mpp-server/build.gradle.kts ./mpp-server/
 COPY mpp-codegraph/build.gradle.kts ./mpp-codegraph/
 
 # Download dependencies (cached layer)
-RUN ./gradlew :mpp-server:dependencies --no-daemon
+RUN sed -i 's/\r$//' ./gradlew && ./gradlew :mpp-server:dependencies --no-daemon
 
 # Copy source code
 COPY mpp-core/src ./mpp-core/src
+COPY mpp-codegraph/src ./mpp-codegraph/src
 COPY mpp-server/src ./mpp-server/src
 
 # Copy other necessary files
 COPY mpp-core/AutoDevCore.podspec ./mpp-core/
 COPY mpp-core/webpack.config.d ./mpp-core/webpack.config.d
-COPY mpp-server/webpack.config.d ./mpp-server/webpack.config.d
 
 # Build fat JAR
 RUN ./gradlew :mpp-server:fatJar --no-daemon
